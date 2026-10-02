@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Calculadora — Costo Real de un Corte de Faja | Robotia</title>
+<style>
+  :root {
+    --navy: #1B2A4A;
+    --navy-dark: #121B33;
+    --teal: #2EC4C6;
+    --teal-dark: #1A8F91;
+    --amber: #E8A33D;
+    --gray: #6B7280;
+    --border: #E2E5EA;
+    --card: #F6F7F9;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Calibri', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #fff;
+    color: #222;
+    margin: 0;
+    padding: 28px 20px 60px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  .eyebrow {
+    font-size: 11.5px; font-weight: 700; color: var(--teal-dark);
+    letter-spacing: 1px; margin-bottom: 4px;
+  }
+  h1 {
+    font-size: 26px; margin: 0; color: var(--navy); line-height: 1.25; font-weight: 700;
+  }
+  h1 span { color: var(--teal-dark); }
+  .sub {
+    font-size: 13.5px; color: var(--gray); max-width: 720px; margin-top: 8px; line-height: 1.5;
+  }
+  .grid {
+    display: grid; grid-template-columns: 360px 1fr; gap: 24px; margin-top: 22px;
+  }
+  @media (max-width: 860px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+  .panel {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px;
+    height: fit-content;
+  }
+  .panel-title {
+    font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 14px;
+  }
+  label.field { display: block; margin-bottom: 14px; }
+  .field-label { font-size: 12.5px; color: var(--navy); font-weight: 600; margin-bottom: 3px; }
+  .field-hint { font-size: 11px; color: var(--gray); margin-top: 3px; line-height: 1.35; }
+  .input-row {
+    display: flex; align-items: center; border: 1px solid var(--border);
+    border-radius: 8px; background: #fff; overflow: hidden;
+  }
+  .input-row input {
+    flex: 1; border: none; outline: none; padding: 8px 10px; font-size: 15px;
+    font-family: inherit; color: var(--navy); background: transparent; width: 100%;
+  }
+  .input-row span {
+    padding: 0 10px; font-size: 12px; color: var(--gray); border-left: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .hr { height: 1px; background: var(--border); margin: 16px 0; }
+  .row2 { display: flex; gap: 12px; }
+  .row2 > div { flex: 1; }
+
+  .card-white {
+    background: #fff; border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 20px; margin-bottom: 18px;
+  }
+  .card-title { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 12px; }
+  .line-row {
+    display: flex; justify-content: space-between; padding: 8px 0; font-size: 13.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  .line-row:last-of-type { border-bottom: none; }
+  .line-row .val { font-weight: 600; color: var(--navy); }
+  .total-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-top: 14px; padding-top: 14px; border-top: 2px solid var(--navy);
+  }
+  .total-label { font-size: 14px; font-weight: 700; color: var(--navy); }
+  .total-value { font-size: 26px; font-weight: 700; color: var(--teal-dark); }
+  .multiplier { text-align: right; font-size: 12px; color: var(--gray); margin-top: 2px; }
+
+  .compare-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px;
+  }
+  @media (max-width: 560px) { .compare-grid { grid-template-columns: 1fr; } }
+  .compare-box {
+    background: var(--navy); border-radius: 12px; padding: 16px 18px; color: #fff;
+  }
+  .compare-box .cb-title { font-size: 11.5px; font-weight: 700; letter-spacing: .5px; color: var(--teal); }
+  .compare-box .cb-label { margin-top: 10px; font-size: 12px; color: #C9D6E8; }
+  .compare-box .cb-value { font-size: 19px; font-weight: 700; }
+  .compare-box .cb-value-big { font-size: 23px; font-weight: 700; color: var(--amber); }
+
+  .offer-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  @media (max-width: 560px) { .offer-grid { grid-template-columns: 1fr; } }
+  .offer-grid .ol { font-size: 11.5px; color: var(--gray); }
+  .offer-grid .ov { font-size: 17px; font-weight: 700; color: var(--navy); }
+  .offer-note {
+    margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);
+    font-size: 13px; color: #333; line-height: 1.5;
+  }
+  .offer-note strong { color: var(--navy); }
+  .offer-note strong.teal { color: var(--teal-dark); }
+
+  .footer-note { margin-top: 20px; font-size: 11px; color: var(--gray); font-style: italic; }
+
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">HERRAMIENTA DE APOYO — REUNIÓN COMERCIAL</div>
+  <h1><span>Calculadora</span> del costo real de un corte de faja</h1>
+  <p class="sub">Ingresa los datos de tu operación para estimar el costo real de un eventual corte de faja. El cálculo se actualiza automáticamente para facilitar la evaluación del impacto económico.</p>
+
+  <div class="grid">
+    <!-- LEFT: inputs -->
+    <div class="panel">
+      <div class="panel-title">Datos del evento</div>
+
+      <label class="field">
+        <div class="field-label">Costo de reparación de la correa</div>
+        <div class="input-row"><input id="repairCost" type="number" value="20000" step="500" min="0"><span>USD</span></div>
+      </label>
+
+      <label class="field">
+        <div class="field-label">Horas de parada por evento</div>
+        <div class="input-row"><input id="downtimeHours" type="number" value="6" step="0.5" min="0"><span>horas</span></div>
+        <div class="field-hint">Desde el atasco hasta reinicio de operación normal.</div>
+      </label>
+
+      <label class="field">
+        <div class="field-label">Capacidad de la línea</div>
+        <div class="input-row"><input id="lineCapacity" type="number" value="300" step="10" min="0"><span>t / h</span></div>
+      </label>
+
+      <label class="field">
+        <div class="field-label">Costo de oportunidad por tonelada</div>
+        <div class="input-row"><input id="tonValue" type="number" value="15" step="1" min="0"><span>USD / t</span></div>
+        <div class="field-hint">Valor o margen que representa cada tonelada no procesada.</div>
+      </label>
+
+      <label class="field">
+        <div class="field-label">Daño estimado a equipos aguas abajo</div>
+        <div class="input-row"><input id="equipmentDamage" type="number" value="15000" step="500" min="0"><span>USD</span></div>
+        <div class="field-hint">Polines, parrillas, chancadora, motorreductores.</div>
+      </label>
+
+      <div class="hr"></div>
+
+      <div class="panel-title">Frecuencia anual</div>
+      <div class="row2">
+        <div>
+          <label class="field">
+            <div class="field-label">Escenario base</div>
+            <div class="input-row"><input id="eventsLow" type="number" value="1" step="1" min="0"><span>ev/año</span></div>
+          </label>
+        </div>
+        <div>
+          <label class="field">
+            <div class="field-label">Peor escenario</div>
+            <div class="input-row"><input id="eventsHigh" type="number" value="3" step="1" min="0"><span>ev/año</span></div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: results -->
+    <div>
+      <div class="card-white">
+        <div class="card-title">Composición del costo real por evento</div>
+        <div class="line-row"><span>Reparación de la correa</span><span class="val" id="out-repair">USD 20.000</span></div>
+        <div class="line-row"><span id="out-tons-label">Tonelaje no procesado (1.800 t)</span><span class="val" id="out-opportunity">USD 27.000</span></div>
+        <div class="line-row"><span>Daño a equipos aguas abajo</span><span class="val" id="out-damage">USD 15.000</span></div>
+        <div class="total-row">
+          <span class="total-label">Costo real estimado por evento</span>
+          <span class="total-value" id="out-total">USD 62.000</span>
+        </div>
+        <div class="multiplier" id="out-multiplier">3,1x el costo de reparación informado (USD 20.000)</div>
+      </div>
+
+      <div class="compare-grid">
+        <div class="compare-box">
+          <div class="cb-title" id="box-low-title">ESCENARIO BASE · 1 EVENTO/AÑO</div>
+          <div class="cb-label">Costo percibido</div>
+          <div class="cb-value" id="box-low-perceived">USD 20.000</div>
+          <div class="cb-label" style="margin-top:8px">Costo real estimado</div>
+          <div class="cb-value-big" id="box-low-real">USD 62.000</div>
+        </div>
+        <div class="compare-box">
+          <div class="cb-title" id="box-high-title">PEOR ESCENARIO · 3 EVENTOS/AÑO</div>
+          <div class="cb-label">Costo percibido</div>
+          <div class="cb-value" id="box-high-perceived">USD 60.000</div>
+          <div class="cb-label" style="margin-top:8px">Costo real estimado</div>
+          <div class="cb-value-big" id="box-high-real">USD 186.000</div>
+        </div>
+      </div>
+
+      <div class="card-white" style="margin-bottom:0;">
+        <div class="card-title">Referencia — oferta Robotia Sentinel</div>
+        <div class="offer-grid">
+          <div><div class="ol">CAPEX (pago único)</div><div class="ov">USD 158.827</div></div>
+          <div><div class="ol">OPEX (desde año 2)</div><div class="ov">USD 132.634/año</div></div>
+          <div><div class="ol">CAPEX amortizado a 3 años</div><div class="ov">USD 52.942/año</div></div>
+        </div>
+        <div class="offer-note" id="offer-note">
+          Costo total año 1 aprox. (CAPEX + OPEX): <strong>USD 291.461</strong> — vs. costo real estimado en el peor escenario: <strong class="teal">USD 186.000</strong> (equivale a 64% del costo año 1).
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">Todos los valores son editables y de referencia. Ajusta cada campo con los datos reales entregados por la operación antes de presentar la comparación final.</div>
+
+</div>
+
+<script>
+  const CAPEX = 158827;
+  const OPEX = 132634;
+  const CAPEX_3Y = CAPEX / 3;
+
+  function fmt(n) {
+    if (!isFinite(n)) return "—";
+    return "USD " + Math.round(n).toLocaleString("es-PE");
+  }
+  function num(v) {
+    const n = parseFloat(v);
+    return isFinite(n) ? n : 0;
+  }
+
+  const ids = ["repairCost","downtimeHours","lineCapacity","tonValue","equipmentDamage","eventsLow","eventsHigh"];
+  ids.forEach(id => document.getElementById(id).addEventListener("input", recalc));
+
+  function recalc() {
+    const repairCost = num(document.getElementById("repairCost").value);
+    const downtimeHours = num(document.getElementById("downtimeHours").value);
+    const lineCapacity = num(document.getElementById("lineCapacity").value);
+    const tonValue = num(document.getElementById("tonValue").value);
+    const equipmentDamage = num(document.getElementById("equipmentDamage").value);
+    const eventsLow = num(document.getElementById("eventsLow").value);
+    const eventsHigh = num(document.getElementById("eventsHigh").value);
+
+    const tonsLost = downtimeHours * lineCapacity;
+    const opportunityCost = tonsLost * tonValue;
+    const realCostPerEvent = repairCost + opportunityCost + equipmentDamage;
+    const multiplier = repairCost > 0 ? realCostPerEvent / repairCost : 0;
+
+    const perceivedLow = repairCost * eventsLow;
+    const perceivedHigh = repairCost * eventsHigh;
+    const realLow = realCostPerEvent * eventsLow;
+    const realHigh = realCostPerEvent * eventsHigh;
+
+    document.getElementById("out-repair").textContent = fmt(repairCost);
+    document.getElementById("out-tons-label").textContent =
+      "Tonelaje no procesado (" + tonsLost.toLocaleString("es-PE") + " t)";
+    document.getElementById("out-opportunity").textContent = fmt(opportunityCost);
+    document.getElementById("out-damage").textContent = fmt(equipmentDamage);
+    document.getElementById("out-total").textContent = fmt(realCostPerEvent);
+    document.getElementById("out-multiplier").textContent =
+      (multiplier > 0 ? multiplier.toFixed(1).replace(".", ",") + "x" : "—") +
+      " el costo de reparación informado (" + fmt(repairCost) + ")";
+
+    document.getElementById("box-low-title").textContent =
+      "ESCENARIO BASE · " + eventsLow + " EVENTO" + (eventsLow === 1 ? "" : "S") + "/AÑO";
+    document.getElementById("box-low-perceived").textContent = fmt(perceivedLow);
+    document.getElementById("box-low-real").textContent = fmt(realLow);
+
+    document.getElementById("box-high-title").textContent =
+      "PEOR ESCENARIO · " + eventsHigh + " EVENTO" + (eventsHigh === 1 ? "" : "S") + "/AÑO";
+    document.getElementById("box-high-perceived").textContent = fmt(perceivedHigh);
+    document.getElementById("box-high-real").textContent = fmt(realHigh);
+
+    const year1Cost = CAPEX + OPEX;
+    const pct = year1Cost > 0 ? (realHigh / year1Cost) * 100 : 0;
+    const pctWord = realHigh >= year1Cost ? "cubre" : "equivale a";
+    document.getElementById("offer-note").innerHTML =
+      "Costo total año 1 aprox. (CAPEX + OPEX): <strong>" + fmt(year1Cost) +
+      "</strong> — vs. costo real estimado en el peor escenario: <strong class=\"teal\">" + fmt(realHigh) +
+      "</strong> (" + pctWord + " " + pct.toFixed(0) + "% del costo año 1).";
+  }
+
+  recalc();
+</script>
+</body>
+</html>
