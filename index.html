@@ -118,7 +118,6 @@
 <body>
 <div class="wrap">
 
-  <div class="eyebrow">HERRAMIENTA DE APOYO — REUNIÓN COMERCIAL</div>
   <h1><span>Calculadora</span> del costo real de un corte de faja</h1>
   <p class="sub">Ingresa los datos de tu operación para estimar el costo real de un eventual corte de faja. El cálculo se actualiza automáticamente para facilitar la evaluación del impacto económico.</p>
 
@@ -208,9 +207,18 @@
       <div class="card-white" style="margin-bottom:0;">
         <div class="card-title">Referencia — oferta Robotia Sentinel</div>
         <div class="offer-grid">
-          <div><div class="ol">CAPEX (pago único)</div><div class="ov">USD 158.827</div></div>
-          <div><div class="ol">OPEX (desde año 2)</div><div class="ov">USD 132.634/año</div></div>
-          <div><div class="ol">CAPEX amortizado a 3 años</div><div class="ov">USD 52.942/año</div></div>
+          <div>
+            <div class="ol">CAPEX (pago único)</div>
+            <div class="input-row"><input id="proposalCapex" type="number" value="158827" step="1000" min="0"><span>USD</span></div>
+          </div>
+          <div>
+            <div class="ol">OPEX anual</div>
+            <div class="input-row"><input id="proposalOpex" type="number" value="132634" step="1000" min="0"><span>USD/año</span></div>
+          </div>
+          <div>
+            <div class="ol">Amortización CAPEX</div>
+            <div class="input-row"><input id="amortYears" type="number" value="3" step="1" min="1"><span>años</span></div>
+          </div>
         </div>
         <div class="offer-note" id="offer-note">
           Costo total año 1 aprox. (CAPEX + OPEX): <strong>USD 291.461</strong> — vs. costo real estimado en el peor escenario: <strong class="teal">USD 186.000</strong> (equivale a 64% del costo año 1).
@@ -224,10 +232,6 @@
 </div>
 
 <script>
-  const CAPEX = 158827;
-  const OPEX = 132634;
-  const CAPEX_3Y = CAPEX / 3;
-
   function fmt(n) {
     if (!isFinite(n)) return "—";
     return "USD " + Math.round(n).toLocaleString("es-PE");
@@ -237,7 +241,7 @@
     return isFinite(n) ? n : 0;
   }
 
-  const ids = ["repairCost","downtimeHours","lineCapacity","tonValue","equipmentDamage","eventsLow","eventsHigh"];
+  const ids = ["repairCost","downtimeHours","lineCapacity","tonValue","equipmentDamage","eventsLow","eventsHigh","proposalCapex","proposalOpex","amortYears"];
   ids.forEach(id => document.getElementById(id).addEventListener("input", recalc));
 
   function recalc() {
@@ -248,6 +252,10 @@
     const equipmentDamage = num(document.getElementById("equipmentDamage").value);
     const eventsLow = num(document.getElementById("eventsLow").value);
     const eventsHigh = num(document.getElementById("eventsHigh").value);
+    const capex = num(document.getElementById("proposalCapex").value);
+    const opex = num(document.getElementById("proposalOpex").value);
+    const amortYears = Math.max(1, num(document.getElementById("amortYears").value));
+    const capexAmortized = capex / amortYears;
 
     const tonsLost = downtimeHours * lineCapacity;
     const opportunityCost = tonsLost * tonValue;
@@ -279,10 +287,11 @@
     document.getElementById("box-high-perceived").textContent = fmt(perceivedHigh);
     document.getElementById("box-high-real").textContent = fmt(realHigh);
 
-    const year1Cost = CAPEX + OPEX;
+    const year1Cost = capex + opex;
     const pct = year1Cost > 0 ? (realHigh / year1Cost) * 100 : 0;
     const pctWord = realHigh >= year1Cost ? "cubre" : "equivale a";
     document.getElementById("offer-note").innerHTML =
+      "CAPEX amortizado a " + amortYears + " años: <strong>" + fmt(capexAmortized) + "/año</strong> — " +
       "Costo total año 1 aprox. (CAPEX + OPEX): <strong>" + fmt(year1Cost) +
       "</strong> — vs. costo real estimado en el peor escenario: <strong class=\"teal\">" + fmt(realHigh) +
       "</strong> (" + pctWord + " " + pct.toFixed(0) + "% del costo año 1).";
